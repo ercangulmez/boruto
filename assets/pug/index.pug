@@ -1,0 +1,13 @@
+extends _partial/layout
+
+block head
+  include _partial/head
+  link(href="stylesheets/index.css", rel="stylesheet")
+
+block content
+  header
+    img(src="images/fac.png")
+    h1 Welcome to use boruto
+
+block foot
+  script(src="//cdn.bootcss.com/require.js/2.1.22/require.min.js", data-main="scripts/index")
