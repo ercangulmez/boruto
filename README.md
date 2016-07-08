@@ -1,4 +1,4 @@
-# Web开发工具2.0.5-alpha
+# Web开发工具2.0.6-alpha
 
 [![Travis](https://img.shields.io/travis/cntanglijun/boruto-cli.svg?maxAge=2592000?style=flat-square)](https://travis-ci.org/cntanglijun/boruto-cli)
 [![npm](https://img.shields.io/npm/v/boruto.svg?maxAge=2592000?style=flat-square)](https://www.npmjs.com/package/boruto)
@@ -37,20 +37,21 @@ boruto server <directory> --port 8080 --basedir .,.tmp
 |:---------------:|:--------------:|
 |&lt;directory&gt;|设置服务器目录(初始化的目录)|
 |--port           |设置服务器端口号|
-|--basedir            |设置服务器根目录(可选多个文件夹,使用','分割)|
+|--basedir        |设置服务器根目录(可选多个文件夹,使用','分割)|
 
 > 注:目录之间逗号分割没有空格
 
 ### 发布
 
 ```bash
-boruto dist <directory> --output <directory>
+boruto dist <directory> --output <directory> --config <path>
 ```
 
 |参数             |说明            |
 |:---------------:|:--------------:|
 |&lt;directory&gt;|设置需要发布的资源目录(初始化的目录)|
-|--output          |设置输出目录(默认为初始化的目录下的dist文件夹)|
+|--output         |设置输出目录(默认为初始化的目录下的dist文件夹)|
+|--config         |设置指定requirejs配置文件路劲 
 
 ## license
 

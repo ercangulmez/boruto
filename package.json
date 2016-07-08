@@ -1,6 +1,6 @@
 {
   "name": "boruto",
-  "version": "2.0.5-alpha",
+  "version": "2.0.6-alpha",
   "description": "Web开发工具",
   "bin": "bin/boruto.js",
   "dependencies": {
@@ -15,6 +15,7 @@
     "html-minifier": "^2.1.5",
     "less": "^2.7.1",
     "map-stream": "^0.0.6",
+    "nib": "^1.1.0",
     "pug": "^2.0.0-beta3",
     "requirejs": "^2.2.0",
     "stylus": "^0.54.5",
