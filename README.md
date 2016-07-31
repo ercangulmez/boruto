@@ -51,7 +51,7 @@ boruto dist <directory> --output <directory> --config <path>
 |:---------------:|:--------------:|
 |&lt;directory&gt;|设置需要发布的资源目录(初始化的目录)|
 |--output         |设置输出目录(默认为初始化的目录下的dist文件夹)|
-|--config         |设置指定requirejs配置文件路劲 
+|--config         |设置指定requirejs配置文件路径
 
 ## license
 
