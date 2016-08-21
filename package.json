@@ -1,6 +1,6 @@
 {
   "name": "boruto",
-  "version": "2.0.7-alpha",
+  "version": "2.1.0-alpha",
   "description": "Web开发工具",
   "bin": "bin/boruto.js",
   "dependencies": {
