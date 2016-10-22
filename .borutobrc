@@ -1,0 +1,12 @@
+{
+  "presets": [
+    "latest",
+    "stage-0"
+  ],
+  "plugins": [
+    "transform-es2015-modules-amd",
+    "transform-es5-property-mutators",
+    "transform-es3-property-literals",
+    "transform-es3-member-expression-literals"
+  ]
+}

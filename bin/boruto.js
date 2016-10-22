@@ -67,8 +67,8 @@ function _initializationHandler(dir) {
   var root = dir || '.';
   var assetsDir = 'assets';
 
-  _boruto2.default.walk(_path2.default.join(__dirname, '..', assetsDir), function (filePath) {
-    var outPath = _path2.default.resolve(filePath.replace(assetsDir, root));
+  _boruto2.default.walk(_path2.default.join(__dirname, '..', assetsDir), function (filePath, basename, dirname) {
+    var outPath = _path2.default.resolve(filePath.replace(dirname, root));
 
     _fsExtra2.default.outputFileSync(outPath, _fs2.default.readFileSync(filePath));
     _log2.default.initialize('Created', outPath);

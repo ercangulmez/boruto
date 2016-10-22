@@ -63,16 +63,7 @@ function compressAMD( filename, option, callback ) {
 
 function compileES6( filename ) {
   const compiledJs = transformFileSync( filename, {
-    presets: [
-      'latest',
-      'stage-0'
-    ],
-    plugins: [
-      'transform-es2015-modules-amd',
-      'transform-es5-property-mutators',
-      'transform-es3-property-literals',
-      'transform-es3-member-expression-literals'
-    ]
+    extends: path.join( __dirname, '..', '.borutobrc' )
   } ).code;
 
   return compiledJs;
