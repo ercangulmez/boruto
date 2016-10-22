@@ -1,6 +1,6 @@
 {
   "name": "boruto",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "The tool for web development",
   "bin": "bin/boruto.js",
   "scripts": {
