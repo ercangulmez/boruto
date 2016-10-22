@@ -1,8 +1,8 @@
-.idea
+/.idea
 *.log
 .DS_Store
 node_modules
-test
-src
-.babelrc
-.editorconfig
+/test
+/src
+/.babelrc
+/.editorconfig
