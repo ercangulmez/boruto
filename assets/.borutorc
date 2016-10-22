@@ -1,0 +1,19 @@
+{
+  "server": {
+    "extDirs": [],
+    "serveStatic": [],
+    "port": 8080,
+    "open": false
+  },
+  "dist": {
+    "distDir": "dist",
+    "compress": true,
+    "requirejsConfig": "app/scripts/config.js",
+    "amdOptimizationDir": [
+      "app/scripts"
+    ],
+    "templateDir": [
+      "app/scripts/_template"
+    ]
+  }
+}

@@ -1,58 +1,85 @@
-# Web开发工具2.1.0-alpha
+# The tool for web development
 
-[![Travis](https://img.shields.io/travis/cntanglijun/boruto-cli.svg?maxAge=2592000?style=flat-square)](https://travis-ci.org/cntanglijun/boruto-cli)
-[![npm](https://img.shields.io/npm/v/boruto.svg?maxAge=2592000?style=flat-square)](https://www.npmjs.com/package/boruto)
-[![npm](https://img.shields.io/npm/dm/boruto.svg?maxAge=2592000?style=flat-square)](https://www.npmjs.com/package/boruto)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://raw.githubusercontent.com/cntanglijun/boruto-cli/master/LICENSE)
+> pug + stylus + es6
 
-## 安装(Installation)
+[![npm](https://img.shields.io/npm/v/boruto.svg)](https://www.npmjs.com/package/boruto)
+[![node](https://img.shields.io/node/v/boruto.svg)](https://github.com/cntanglijun/boruto)
+[![GitHub tag](https://img.shields.io/github/tag/cntanglijun/boruto.svg)](https://github.com/cntanglijun/boruto/tags)
+[![GitHub release](https://img.shields.io/github/release/cntanglijun/boruto.svg)](https://github.com/cntanglijun/boruto/releases)
+[![npm](https://img.shields.io/npm/dm/boruto.svg)](https://www.npmjs.com/package/boruto)
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/cntanglijun/boruto-cli/master/LICENSE)
+
+## Workflow
+
+![Workflow](./workflow.png)
+
+## Installation
 
 ``` bash
 npm i boruto -g
 ```
 
-## 使用(Usage)
+## Usage
 
-### 初始化
+##### Initialization
+
 ``` bash
-boruto init <directory> --html pug --amd pug --css stylus
+boruto init [directory]
 ```
 
-|参数             |说明            |
-|:---------------:|:--------------:|
-|&lt;directory&gt;|需要初始化的目录  |
-|--html           |可选html模板(pug, ejs)默认为pug|
-|--css            |可选样式模板(stylus, less)默认为stylus|
-|--amd            |可选amd模板(pug, ejs)默认为pug|
+| param | desc |
+|:---:|:---:|
+| [directory] | Set the dir for initialization |
 
 
-> 注:一般情况html模板与amd模板为相同类型
-
-### 调试
-```bash
-boruto server <directory> --port 8080 --basedir .,.tmp
-```
-
-|参数             |说明            |
-|:---------------:|:--------------:|
-|&lt;directory&gt;|设置服务器目录(初始化的目录)|
-|--port           |设置服务器端口号|
-|--basedir        |设置服务器根目录(可选多个文件夹,使用','分割)|
-
-> 注:目录之间逗号分割没有空格
-
-### 发布
+##### Debug
 
 ```bash
-boruto dist <directory> --output <directory> --config <path>
+boruto server [directory]
 ```
 
-|参数             |说明            |
-|:---------------:|:--------------:|
-|&lt;directory&gt;|设置需要发布的资源目录(初始化的目录)|
-|--output         |设置输出目录(默认为初始化的目录下的dist文件夹)|
-|--config         |设置指定requirejs配置文件路径
+| param | desc |
+|:---:|:---:|
+| [directory]| Set the dir for server |
 
-## license
+##### Dist
+
+```bash
+boruto dist [directory]
+```
+
+| 参数 | 说明 |
+|:---:|:---:|
+| [directory] | Set the dir for dist |
+
+## .borutorc
+
+The config file for boruto
+
+```json
+{
+  "server": {
+    "extDirs": [],
+    "serveStatic": [],
+    "port": 8080,
+    "open": false
+  },
+  "dist": {
+    "distDir": "dist",
+    "compress": true,
+    "requirejsConfig": "app/scripts/config.js",
+    "amdOptimizationDir": [
+      "app/scripts"
+    ],
+    "templateDir": [
+      "app/scripts/_template"
+    ]
+  }
+}
+```
+
+Boruto's server use browsersync, so you can find more options in [https://browsersync.io/docs/options/](https://browsersync.io/docs/options/)
+
+## License
 
 MIT
