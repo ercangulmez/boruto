@@ -1,6 +1,6 @@
 {
   "name": "boruto",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "The tool for web development",
   "bin": "bin/boruto.js",
   "scripts": {
@@ -22,7 +22,7 @@
     "html-minifier": "^3.1.0",
     "moment": "^2.15.1",
     "nib": "^1.1.2",
-    "node-log.js": "0.0.2",
+    "node-log.js": "0.0.3",
     "pug": "^2.0.0-beta6",
     "requirejs": "^2.3.2",
     "stylus": "^0.54.5",
