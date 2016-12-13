@@ -1,0 +1,50 @@
+{
+  "name": "boruto",
+  "version": "2.2.4",
+  "description": "The tool for web development",
+  "bin": "bin/boruto.js",
+  "scripts": {
+    "start": "babel ./src -d ./ -w --no-comments",
+    "test": "mocha -c"
+  },
+  "dependencies": {
+    "babel-core": "^6.17.0",
+    "babel-plugin-transform-es2015-modules-amd": "^6.8.0",
+    "babel-plugin-transform-es3-member-expression-literals": "^6.8.0",
+    "babel-plugin-transform-es3-property-literals": "^6.8.0",
+    "babel-plugin-transform-es5-property-mutators": "^6.8.0",
+    "babel-preset-latest": "^6.16.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "browser-sync": "^2.17.5",
+    "clean-css": "^3.4.20",
+    "commander": "^2.9.0",
+    "fs-extra": "^0.30.0",
+    "html-minifier": "^3.1.0",
+    "moment": "^2.15.1",
+    "nib": "^1.1.2",
+    "node-log.js": "0.0.3",
+    "pug": "^2.0.0-beta6",
+    "requirejs": "^2.3.2",
+    "stylus": "^0.54.5",
+    "uglify-js": "^2.7.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cntanglijun/boruto-cli.git"
+  },
+  "author": "cntanglijun",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/cntanglijun/boruto-cli/issues"
+  },
+  "homepage": "https://github.com/cntanglijun/boruto-cli#readme",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-preset-latest": "^6.16.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "mocha": "^3.2.0"
+  },
+  "engines": {
+    "node": "*"
+  }
+}
