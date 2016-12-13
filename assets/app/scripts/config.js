@@ -1,6 +1,7 @@
 // The config file of requirejs
 // More: http://requirejs.org/docs/api.html#config
 require.config({
+  baseUrl: './scripts',
   paths: {
     // http://jquery.com/
     jquery: '//cdn.bootcss.com/jquery/1.12.1/jquery.min',

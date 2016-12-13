@@ -41,22 +41,18 @@ var _package = require('../package.json');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Boruto config
 var borutorc = '.borutorc';
-// App directory
+
 var appDir = 'app';
-// Ignore prefix
+
 var ignorePrefix = '_';
 
 _commander2.default.version(_package.version);
 
-// Initialization
 _commander2.default.command('init [dir]').description('Initialize the app template.').action(_initializationHandler);
 
-// Server
 _commander2.default.command('server [dir]').description('The web server for boruto and thanks for browser-sync.').action(_serverHandler);
 
-// Dist
 _commander2.default.command('dist [dir]').description('The web server for boruto and thanks for browser-sync.').action(_distHandler);
 
 _commander2.default.parse(process.argv);
@@ -244,15 +240,40 @@ function _distHandler(dir) {
 
   _log2.default.success('\nDistributation is finished!\n');
 
-  // Combine requirejs-base modules
   if (willOptimizeAmdModules.length > 0) {
     (function () {
       _log2.default.warn('\nOtimizing ...\n');
 
       var count = 0;
+      var templateDir = config.templateDir || [];
+      var moduleDir = config.moduleDir || [];
+      var willBeRemoved = [];
+
+      templateDir.concat(moduleDir).forEach(function (dir) {
+        _boruto2.default.walk(_path2.default.join(root, dir), function (filePath) {
+          var extname = _path2.default.extname(filePath);
+          var distpath = _replaceExtname(filePath, extname, '.js');
+          var content = '';
+
+          switch (extname) {
+            case '.es6':
+              content = _boruto2.default.compileES6(filePath);
+              willBeRemoved.push(distpath);
+              break;
+            case '.pug':
+              content = _boruto2.default.compilePugToAMD(filePath);
+              willBeRemoved.push(distpath);
+              break;
+          }
+
+          content && _fsExtra2.default.outputFileSync(distpath, content);
+        });
+      });
 
       willOptimizeAmdModules.forEach(function (module) {
-        _requirejsOptimize(module, function (willBeRemoved) {
+        _requirejsOptimize(module, function (removableFile) {
+
+          willBeRemoved = willBeRemoved.concat(removableFile);
 
           ++count;
 
@@ -263,8 +284,9 @@ function _distHandler(dir) {
           _log2.default.dist('Optimized', _path2.default.resolve(module.filePath), _path2.default.resolve(module.outPath));
 
           if (count === willOptimizeAmdModules.length) {
+
             willBeRemoved.forEach(function (file) {
-              _fs2.default.unlink(file);
+              _fs2.default.unlinkSync(file);
             });
 
             _log2.default.success('\nOtimizing is finished ...\n');
@@ -284,31 +306,7 @@ function _requirejsOptimize(_ref, callback) {
   var extname = _path2.default.extname(filePath);
   var distpath = _replaceExtname(filePath, extname, '.js');
   var config = _getbrc(root).dist;
-  var templateDir = config.templateDir || [];
   var willBeRemoved = [];
-
-  if (_util2.default.isArray(templateDir)) {
-    templateDir.forEach(function (dir) {
-      _boruto2.default.walk(_path2.default.join(root, dir), function (filePath) {
-        var extname = _path2.default.extname(filePath);
-        var distpath = _replaceExtname(filePath, extname, '.js');
-        var content = '';
-
-        switch (extname) {
-          case '.es6':
-            content = _boruto2.default.compileES6(filePath);
-            willBeRemoved.push(distpath);
-            break;
-          case '.pug':
-            content = _boruto2.default.compilePugToAMD(filePath);
-            willBeRemoved.push(distpath);
-            break;
-        }
-
-        content && _fsExtra2.default.outputFileSync(distpath, content);
-      });
-    });
-  }
 
   var option = {
     out: outPath,
@@ -319,6 +317,7 @@ function _requirejsOptimize(_ref, callback) {
 
   if (extname === '.es6') {
     content = _boruto2.default.compileES6(filePath);
+    willBeRemoved.push(distpath);
   } else {
     content = _fs2.default.readFileSync(filePath);
   }

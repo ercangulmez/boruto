@@ -1,74 +1,71 @@
-import { spawn, spawnSync } from 'child_process';
-import assert from 'assert';
-import fse from 'fs-extra';
-import path from 'path';
-import boruto from '../lib/boruto';
+import { spawn, spawnSync, execFileSync } from 'child_process'
+import assert from 'assert'
+import fse from 'fs-extra'
+import path from 'path'
+import boruto from '../lib/boruto'
 
-const spawnConfig = {
-  shell: true
-};
+const commandRoot = path.join(__dirname, '../bin/boruto.js').split(path.sep).join('/')
+const testRoot = path.join(__dirname, '../.borutotest').split(path.sep).join('/')
+const assertsRoot = path.join(__dirname, '../assets').split(path.sep).join('/')
 
-const command = 'bin/boruto.js';
-const testRoot = '../.borutotest';
+describe('Test is starting...', function() {
 
-describe( 'Test is starting...', function () {
+  this.timeout(20000)
 
-  this.timeout( 20000 );
+  before(function() {
+    spawnSync('node', [commandRoot, 'init', testRoot])
+  })
 
-  before( () => {
-    spawnSync( command, [ 'init', testRoot ], spawnConfig );
-  } );
+  after(() => {
+    fse.removeSync(testRoot)
+  })
 
-  after( () => {
-    fse.removeSync( path.join( __dirname, '..', testRoot ) );
-  } );
+  describe('Test `boruto init` ', () => {
+    it('Should have all template files', () => {
+      let allCount = 0
+      let sourceCount = 0
 
-  describe( 'Test `boruto init` ', () => {
-    it( 'Should have all template files', () => {
-      let allCount = 0;
-      let sourceCount = 0;
+      boruto.walk(assertsRoot, () => {++sourceCount })
+      boruto.walk(testRoot, () => {++allCount })
 
-      boruto.walk( path.join( __dirname, '../assets' ), () => { ++sourceCount } );
-      boruto.walk( path.join( __dirname, '.tmp' ), () => { ++allCount } );
+      assert.strictEqual(allCount, sourceCount)
+    })
+  })
 
-      assert.strictEqual( allCount, sourceCount );
-    } );
-  } );
+  describe('Test `boruto server` ', () => {
+    it('Should start server', done => {
+      const server = spawn('node', [commandRoot, 'server', testRoot])
+      const stream = []
 
-  describe( 'Test `boruto server` ', () => {
-    it( 'Should start server', done => {
-      const server = spawn( command, [ 'server', testRoot ], spawnConfig );
-      const stream = [];
+      server.stdout.on('data', data => {
+        stream.push(data)
 
-      server.stdout.on( 'data', data => {
-        stream.push( data );
-
-        if ( stream.length === 1 ) {
-          server.kill();
-          done();
+        if (stream.length === 1) {
+          server.kill()
+          done()
         }
-      } );
-    } );
-  } );
+      })
+    })
+  })
 
-  describe( 'Test `boruto dist` ', () => {
-    const borutorc = path.join( __dirname, '..', 'assets', '.borutorc' );
-    const distDir = fse.readJsonSync( borutorc ).dist.distDir;
-    const ignoredFiles = [];
+  describe('Test `boruto dist` ', () => {
+    const borutorc = path.join(assertsRoot, '.borutorc')
+    const distDir = fse.readJsonSync(borutorc).dist.distDir
+    const ignoredFiles = []
 
-    it( 'Should have all distributed files in `<distDir>` without ignore files', () => {
-      spawnSync( command, [ 'dist', testRoot ], spawnConfig );
+    it('Should have all distributed files in `<distDir>` without ignore files', () => {
+      spawnSync('node', [commandRoot, 'dist', testRoot])
 
-      boruto.walk( path.join( testRoot, distDir ), file => {
-        let ignore = file.split( path.sep ).find( item => {
-          return item[ 0 ] === '_';
-        } );
+      boruto.walk(path.join(testRoot, distDir), file => {
+        let ignore = file.split(path.sep).find(item => {
+          return item[0] === '_'
+        })
 
-        ignore && ignoredFiles.push( ignore );
-      } );
+        ignore && ignoredFiles.push(ignore)
+      })
 
-      assert.strictEqual( 0, ignoredFiles.length );
+      assert.strictEqual(0, ignoredFiles.length)
 
-    } );
-  } );
-} );
+    })
+  })
+})

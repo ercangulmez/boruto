@@ -102,7 +102,7 @@ function _serverHandler( dir ) {
           res.setHeader( 'Content-Type', 'application/javascript' );
 
           es6File = _replaceExtname( reqFile, extname, '.es6' );
-          pugFile = _replaceExtname( reqFile, extname, '.pug' )
+          pugFile = _replaceExtname( reqFile, extname, '.pug' );
 
           if ( fs.existsSync( reqFile ) ) {
             resContent = fs.readFileSync( reqFile );
@@ -230,41 +230,11 @@ function _distHandler( dir ) {
     log.warn( '\nOtimizing ...\n' );
 
     let count = 0;
+    const templateDir = config.templateDir || [];
+    const moduleDir = config.moduleDir || [];
+    let willBeRemoved = [];
 
-    willOptimizeAmdModules.forEach( module => {
-      _requirejsOptimize( module, willBeRemoved => {
-
-        ++count;
-
-        if ( config.compress ) {
-          fse.outputFileSync( module.outPath, boruto.compressJS( fs.readFileSync( module.outPath, 'utf8' ) ) );
-        }
-
-        log.dist( 'Optimized', path.resolve( module.filePath ), path.resolve( module.outPath ) );
-
-        if ( count === willOptimizeAmdModules.length ) {
-          willBeRemoved.forEach( file => {
-            fs.unlink( file );
-          } );
-
-          log.success( '\nOtimizing is finished ...\n' );
-        }
-
-      } );
-    } );
-  }
-}
-
-function _requirejsOptimize( { root, filePath, outPath }, callback ) {
-
-  const extname = path.extname( filePath );
-  const distpath = _replaceExtname( filePath, extname, '.js' );
-  const config = _getbrc( root ).dist;
-  const templateDir = config.templateDir || [];
-  const willBeRemoved = [];
-
-  if ( util.isArray( templateDir ) ) {
-    templateDir.forEach( dir => {
+    templateDir.concat(moduleDir).forEach( dir => {
       boruto.walk( path.join( root, dir ), filePath => {
         const extname = path.extname( filePath );
         const distpath = _replaceExtname( filePath, extname, '.js' );
@@ -284,7 +254,40 @@ function _requirejsOptimize( { root, filePath, outPath }, callback ) {
         content && fse.outputFileSync( distpath, content );
       } );
     } );
+
+    willOptimizeAmdModules.forEach( module => {
+      _requirejsOptimize( module, removableFile => {
+
+        willBeRemoved = willBeRemoved.concat(removableFile);
+
+        ++count;
+
+        if ( config.compress ) {
+          fse.outputFileSync( module.outPath, boruto.compressJS( fs.readFileSync( module.outPath, 'utf8' ) ) );
+        }
+
+        log.dist( 'Optimized', path.resolve( module.filePath ), path.resolve( module.outPath ) );
+
+        if ( count === willOptimizeAmdModules.length ) {
+
+          willBeRemoved.forEach( file => {
+            fs.unlinkSync( file );
+          } );
+
+          log.success( '\nOtimizing is finished ...\n' );
+        }
+
+      } );
+    } );
   }
+}
+
+function _requirejsOptimize( { root, filePath, outPath }, callback ) {
+
+  const extname = path.extname( filePath );
+  const distpath = _replaceExtname( filePath, extname, '.js' );
+  const config = _getbrc( root ).dist;
+  const willBeRemoved = [];
 
   const option = {
     out: outPath,
@@ -295,6 +298,7 @@ function _requirejsOptimize( { root, filePath, outPath }, callback ) {
 
   if ( extname === '.es6' ) {
     content = boruto.compileES6( filePath );
+    willBeRemoved.push(distpath);
   } else {
     content = fs.readFileSync( filePath );
   }

@@ -14,6 +14,7 @@
     ],
     "templateDir": [
       "app/scripts/_template"
-    ]
+    ],
+    "moduleDir": []
   }
 }

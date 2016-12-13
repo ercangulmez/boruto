@@ -20,23 +20,20 @@ var _boruto2 = _interopRequireDefault(_boruto);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var spawnConfig = {
-  shell: true
-};
-
-var command = 'bin/boruto.js';
-var testRoot = 'test/.tmp';
+var commandRoot = _path2.default.join(__dirname, '../bin/boruto.js').split(_path2.default.sep).join('/');
+var testRoot = _path2.default.join(__dirname, '../.borutotest').split(_path2.default.sep).join('/');
+var assertsRoot = _path2.default.join(__dirname, '../assets').split(_path2.default.sep).join('/');
 
 describe('Test is starting...', function () {
 
   this.timeout(20000);
 
   before(function () {
-    (0, _child_process.spawnSync)(command, ['init', testRoot], spawnConfig);
+    (0, _child_process.spawnSync)('node', [commandRoot, 'init', testRoot]);
   });
 
   after(function () {
-    _fsExtra2.default.removeSync(_path2.default.join(__dirname, '..', testRoot));
+    _fsExtra2.default.removeSync(testRoot);
   });
 
   describe('Test `boruto init` ', function () {
@@ -44,10 +41,10 @@ describe('Test is starting...', function () {
       var allCount = 0;
       var sourceCount = 0;
 
-      _boruto2.default.walk(_path2.default.join(__dirname, '../assets'), function () {
+      _boruto2.default.walk(assertsRoot, function () {
         ++sourceCount;
       });
-      _boruto2.default.walk(_path2.default.join(__dirname, '.tmp'), function () {
+      _boruto2.default.walk(testRoot, function () {
         ++allCount;
       });
 
@@ -57,7 +54,7 @@ describe('Test is starting...', function () {
 
   describe('Test `boruto server` ', function () {
     it('Should start server', function (done) {
-      var server = (0, _child_process.spawn)(command, ['server', testRoot], spawnConfig);
+      var server = (0, _child_process.spawn)('node', [commandRoot, 'server', testRoot]);
       var stream = [];
 
       server.stdout.on('data', function (data) {
@@ -72,12 +69,12 @@ describe('Test is starting...', function () {
   });
 
   describe('Test `boruto dist` ', function () {
-    var borutorc = _path2.default.join(__dirname, '..', 'assets', '.borutorc');
+    var borutorc = _path2.default.join(assertsRoot, '.borutorc');
     var distDir = _fsExtra2.default.readJsonSync(borutorc).dist.distDir;
     var ignoredFiles = [];
 
     it('Should have all distributed files in `<distDir>` without ignore files', function () {
-      (0, _child_process.spawnSync)(command, ['dist', testRoot], spawnConfig);
+      (0, _child_process.spawnSync)('node', [commandRoot, 'dist', testRoot]);
 
       _boruto2.default.walk(_path2.default.join(testRoot, distDir), function (file) {
         var ignore = file.split(_path2.default.sep).find(function (item) {
