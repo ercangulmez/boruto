@@ -1,0 +1,28 @@
+{
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "amd": true
+  },
+  "rules": {
+    "space-before-blocks": "error",
+    "arrow-spacing": "error",
+    "keyword-spacing": ["error", {
+      "overrides": {
+        "if": {
+          "after": false
+        },
+        "for": {
+          "after": false
+        },
+        "while": {
+          "after": false
+        }
+      }
+    }]
+  }
+}

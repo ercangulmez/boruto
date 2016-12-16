@@ -73,7 +73,8 @@ The config file for boruto
     ],
     "templateDir": [
       "app/scripts/_template"
-    ]
+    ],
+    "moduleDir": []
   }
 }
 ```
