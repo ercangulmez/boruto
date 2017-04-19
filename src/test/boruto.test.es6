@@ -1,4 +1,4 @@
-import { spawn, spawnSync, execFileSync } from 'child_process'
+import { spawn, spawnSync } from 'child_process'
 import assert from 'assert'
 import fse from 'fs-extra'
 import path from 'path'
@@ -49,7 +49,7 @@ describe('Test is starting...', function() {
   })
 
   describe('Test `boruto dist` ', () => {
-    const borutorc = path.join(assertsRoot, '.borutorc')
+    const borutorc = path.join(assertsRoot, '.borutorc.json')
     const distDir = fse.readJsonSync(borutorc).dist.distDir
     const ignoredFiles = []
 

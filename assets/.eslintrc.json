@@ -1,5 +1,6 @@
 {
   "extends": "eslint:recommended",
+  "parser": "babel-eslint",
   "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module"
@@ -11,18 +12,6 @@
   "rules": {
     "space-before-blocks": "error",
     "arrow-spacing": "error",
-    "keyword-spacing": ["error", {
-      "overrides": {
-        "if": {
-          "after": false
-        },
-        "for": {
-          "after": false
-        },
-        "while": {
-          "after": false
-        }
-      }
-    }]
+    "keyword-spacing": "error"
   }
 }
