@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 
+require('babel-polyfill');
+
 var _commander = require('commander');
 
 var _commander2 = _interopRequireDefault(_commander);
@@ -25,9 +27,17 @@ var _url = require('url');
 
 var _url2 = _interopRequireDefault(_url);
 
-var _util = require('util');
+var _imagemin = require('imagemin');
 
-var _util2 = _interopRequireDefault(_util);
+var _imagemin2 = _interopRequireDefault(_imagemin);
+
+var _imageminJpegtran = require('imagemin-jpegtran');
+
+var _imageminJpegtran2 = _interopRequireDefault(_imageminJpegtran);
+
+var _imageminPngquant = require('imagemin-pngquant');
+
+var _imageminPngquant2 = _interopRequireDefault(_imageminPngquant);
 
 var _boruto = require('../lib/boruto');
 
@@ -41,12 +51,13 @@ var _package = require('../package.json');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var borutorc = '.borutorc';
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+var borutorc = '.borutorc.json';
 
 var appDir = 'app';
 
 var ignorePrefix = '_';
-
 _commander2.default.version(_package.version);
 
 _commander2.default.command('init [dir]').description('Initialize the app template.').action(_initializationHandler);
@@ -54,9 +65,7 @@ _commander2.default.command('init [dir]').description('Initialize the app templa
 _commander2.default.command('server [dir]').description('The web server for boruto and thanks for browser-sync.').action(_serverHandler);
 
 _commander2.default.command('dist [dir]').description('The web server for boruto and thanks for browser-sync.').action(_distHandler);
-
 _commander2.default.parse(process.argv);
-
 function _initializationHandler(dir) {
   _log2.default.warn('\nInitializing...\n');
 
@@ -72,7 +81,6 @@ function _initializationHandler(dir) {
 
   _log2.default.success('\nInitialization is finished!\n');
 }
-
 function _serverHandler(dir) {
   var root = dir || '.';
   var serverRoot = _path2.default.join(root, appDir);
@@ -80,13 +88,14 @@ function _serverHandler(dir) {
 
   (0, _browserSync2.default)(Object.assign({
     server: [serverRoot].concat(config.extDirs || []),
-    middleware: function middleware(req, res, next) {
+    middleware: function middleware(req, res) {
       var file = _url2.default.parse(req.url.slice(1)).pathname || 'index.html';
       var extname = _path2.default.extname(file);
       var reqFile = _path2.default.join(serverRoot, file);
 
       var pugFile = '';
       var stylusFile = '';
+      var esFile = '';
       var es6File = '';
       var resContent = '';
 
@@ -118,13 +127,16 @@ function _serverHandler(dir) {
         case '.js':
           res.setHeader('Content-Type', 'application/javascript');
 
+          esFile = _replaceExtname(reqFile, extname, '.es');
           es6File = _replaceExtname(reqFile, extname, '.es6');
           pugFile = _replaceExtname(reqFile, extname, '.pug');
 
           if (_fs2.default.existsSync(reqFile)) {
             resContent = _fs2.default.readFileSync(reqFile);
+          } else if (_fs2.default.existsSync(esFile)) {
+            resContent = _boruto2.default.compileES(esFile);
           } else if (_fs2.default.existsSync(es6File)) {
-            resContent = _boruto2.default.compileES6(es6File);
+            resContent = _boruto2.default.compileES(es6File);
           } else if (_fs2.default.existsSync(pugFile)) {
             resContent = _boruto2.default.compilePugToAMD(pugFile);
           }
@@ -150,13 +162,13 @@ function _serverHandler(dir) {
     }]
   }, config || {}));
 }
-
 function _distHandler(dir) {
   var root = _path2.default.join(dir || '.');
   var srcRoot = _path2.default.join(root, appDir);
   var config = _getbrc(root).dist;
-  var distDir = _path2.default.join('..', config.distDir || 'dist');
+  var distDir = _path2.default.join('..', config.distDir);
   var willOptimizeAmdModules = [];
+  var willImageminImages = [];
 
   _log2.default.warn('\nDistributing...\n');
 
@@ -175,7 +187,8 @@ function _distHandler(dir) {
       var outInfo = {
         content: '',
         outpath: '',
-        needRequirejsOptimizer: false
+        needRequirejsOptimizer: false,
+        needImagemin: false
       };
 
       switch (extname) {
@@ -197,8 +210,9 @@ function _distHandler(dir) {
           }
 
           break;
+        case '.es':
         case '.es6':
-          outInfo.content = _boruto2.default.compileES6(filePath);
+          outInfo.content = _boruto2.default.compileES(filePath);
           outInfo.outpath = _replaceExtname(distPath, extname, '.js');
           outInfo.needRequirejsOptimizer = {
             root: root,
@@ -214,7 +228,7 @@ function _distHandler(dir) {
             outInfo.needRequirejsOptimizer = {
               root: root,
               filePath: filePath,
-              outPath: outInfo.outpath
+              outPath: distPath
             };
           } else {
             if (config.compress) {
@@ -222,6 +236,16 @@ function _distHandler(dir) {
             }
           }
 
+          break;
+        case '.jpg':
+        case '.png':
+          outInfo.content = _fs2.default.readFileSync(filePath);
+          outInfo.outpath = distPath;
+          outInfo.needImagemin = {
+            root: root,
+            filePath: filePath,
+            outPath: distPath
+          };
           break;
         default:
           outInfo.content = _fs2.default.readFileSync(filePath);
@@ -231,6 +255,8 @@ function _distHandler(dir) {
 
       if (outInfo.needRequirejsOptimizer) {
         willOptimizeAmdModules.push(outInfo.needRequirejsOptimizer);
+      } else if (outInfo.needImagemin) {
+        willImageminImages.push(outInfo.needImagemin);
       } else {
         _fsExtra2.default.outputFileSync(outInfo.outpath, outInfo.content);
         _log2.default.dist('Distributed', _path2.default.resolve(filePath), _path2.default.resolve(outInfo.outpath));
@@ -240,13 +266,65 @@ function _distHandler(dir) {
 
   _log2.default.success('\nDistributation is finished!\n');
 
-  if (willOptimizeAmdModules.length > 0) {
-    (function () {
+  var _optimize = function () {
+    var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee() {
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              _context.next = 2;
+              return _optimizeAMD();
+
+            case 2:
+              _context.next = 4;
+              return _optimizeImage();
+
+            case 4:
+            case 'end':
+              return _context.stop();
+          }
+        }
+      }, _callee, this);
+    }));
+
+    return function _optimize() {
+      return _ref.apply(this, arguments);
+    };
+  }();
+
+  _optimize();
+
+  function _optimizeImage() {
+    if (willImageminImages.length > 0) {
+      var queue = [];
+
+      _log2.default.warn('\nImagemin images ...\n');
+
+      willImageminImages.forEach(function (image) {
+        queue.push((0, _imagemin2.default)([image.filePath], _path2.default.dirname(image.outPath), {
+          plugins: [(0, _imageminJpegtran2.default)(), (0, _imageminPngquant2.default)({ quality: '65-80' })]
+        }).then(function () {
+          _log2.default.dist('Imagemin', _path2.default.resolve(image.filePath), _path2.default.resolve(image.outPath));
+        }).catch(function (err) {
+          _log2.default.error(err);
+        }));
+      });
+
+      return Promise.all(queue).then(function () {
+        _log2.default.success('\nImagemin images is finished ...\n');
+      });
+    } else {
+      return Promise.resolve();
+    }
+  }
+  function _optimizeAMD() {
+    if (willOptimizeAmdModules.length > 0) {
       _log2.default.warn('\nOtimizing ...\n');
 
-      var count = 0;
       var templateDir = config.templateDir || [];
       var moduleDir = config.moduleDir || [];
+      var queue = [];
+
       var willBeRemoved = [];
 
       templateDir.concat(moduleDir).forEach(function (dir) {
@@ -256,8 +334,9 @@ function _distHandler(dir) {
           var content = '';
 
           switch (extname) {
+            case '.es':
             case '.es6':
-              content = _boruto2.default.compileES6(filePath);
+              content = _boruto2.default.compileES(filePath);
               willBeRemoved.push(distpath);
               break;
             case '.pug':
@@ -271,36 +350,33 @@ function _distHandler(dir) {
       });
 
       willOptimizeAmdModules.forEach(function (module) {
-        _requirejsOptimize(module, function (removableFile) {
-
+        queue.push(_requirejsOptimize(module).then(function (removableFile) {
           willBeRemoved = willBeRemoved.concat(removableFile);
-
-          ++count;
 
           if (config.compress) {
             _fsExtra2.default.outputFileSync(module.outPath, _boruto2.default.compressJS(_fs2.default.readFileSync(module.outPath, 'utf8')));
           }
 
           _log2.default.dist('Optimized', _path2.default.resolve(module.filePath), _path2.default.resolve(module.outPath));
-
-          if (count === willOptimizeAmdModules.length) {
-
-            willBeRemoved.forEach(function (file) {
-              _fs2.default.unlinkSync(file);
-            });
-
-            _log2.default.success('\nOtimizing is finished ...\n');
-          }
-        });
+        }));
       });
-    })();
+
+      return Promise.all(queue).then(function () {
+        willBeRemoved.forEach(function (file) {
+          _fs2.default.unlinkSync(file);
+        });
+
+        _log2.default.success('\nOtimizing is finished ...\n');
+      });
+    } else {
+      return Promise.resolve();
+    }
   }
 }
-
-function _requirejsOptimize(_ref, callback) {
-  var root = _ref.root;
-  var filePath = _ref.filePath;
-  var outPath = _ref.outPath;
+function _requirejsOptimize(_ref2) {
+  var root = _ref2.root,
+      filePath = _ref2.filePath,
+      outPath = _ref2.outPath;
 
 
   var extname = _path2.default.extname(filePath);
@@ -315,8 +391,8 @@ function _requirejsOptimize(_ref, callback) {
 
   var content = '';
 
-  if (extname === '.es6') {
-    content = _boruto2.default.compileES6(filePath);
+  if (extname === '.es6' || extname === '.es') {
+    content = _boruto2.default.compileES(filePath);
     willBeRemoved.push(distpath);
   } else {
     content = _fs2.default.readFileSync(filePath);
@@ -324,20 +400,27 @@ function _requirejsOptimize(_ref, callback) {
 
   _fsExtra2.default.outputFileSync(distpath, content);
 
-  _boruto2.default.compressAMD(distpath, option, function (err, buildResponse) {
-    if (err) {
-      _log2.default.error(err.message);
-    } else {
-      _util2.default.isFunction(callback) && callback(willBeRemoved);
-    }
+  return _boruto2.default.compressAMD(distpath, option).then(function () {
+    return willBeRemoved;
+  }).catch(function (err) {
+    _log2.default.error(err.message);
   });
 }
-
 function _replaceExtname(pathName, oldExtname, newExtname) {
   return pathName.replace(new RegExp(oldExtname + '$', 'i'), newExtname);
 }
-
 function _getbrc(root) {
   var brc = _path2.default.join(root, borutorc);
-  return _fs2.default.existsSync(brc) && _fsExtra2.default.readJsonSync(brc, 'utf8') || {};
+
+  var config = {};
+
+  if (_fs2.default.existsSync(brc)) {
+    config = _fsExtra2.default.readJsonSync(brc, 'utf8');
+  } else if (_fs2.default.existsSync('.borutorc')) {
+    config = _fsExtra2.default.readJsonSync('.borutorc');
+  } else {
+    config = {};
+  }
+
+  return config;
 }

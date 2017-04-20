@@ -69,7 +69,7 @@ describe('Test is starting...', function () {
   });
 
   describe('Test `boruto dist` ', function () {
-    var borutorc = _path2.default.join(assertsRoot, '.borutorc');
+    var borutorc = _path2.default.join(assertsRoot, '.borutorc.json');
     var distDir = _fsExtra2.default.readJsonSync(borutorc).dist.distDir;
     var ignoredFiles = [];
 
